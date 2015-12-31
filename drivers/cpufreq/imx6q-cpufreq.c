@@ -6,6 +6,7 @@
 #include <linux/clk.h>
 #include <linux/cpu.h>
 #include <linux/cpufreq.h>
+#include <linux/cpu_cooling.h>
 #include <linux/err.h>
 #include <linux/module.h>
 #include <linux/nvmem-consumer.h>
@@ -48,6 +49,7 @@ static struct clk_bulk_data clks[] = {
 };
 
 static struct device *cpu_dev;
+static struct thermal_cooling_device *cdev;
 static bool free_opp;
 static struct cpufreq_frequency_table *freq_table;
 static unsigned int max_freq;
@@ -188,6 +190,28 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	return 0;
 }
 
+static void imx6q_cpufreq_ready(struct cpufreq_policy *policy)
+{
+	struct device_node *np = of_node_get(cpu_dev->of_node);
+
+	if (WARN_ON(!np))
+		return;
+
+	if (of_find_property(np, "#cooling-cells", NULL)) {
+		cdev = of_cpufreq_cooling_register(policy);
+
+		if (IS_ERR(cdev)) {
+			dev_err(cpu_dev,
+				"running cpufreq without cooling device: %ld\n",
+				PTR_ERR(cdev));
+
+			cdev = NULL;
+		}
+	}
+
+	of_node_put(np);
+}
+
 static int imx6q_cpufreq_init(struct cpufreq_policy *policy)
 {
 	policy->clk = clks[ARM].clk;
@@ -205,6 +229,7 @@ static struct cpufreq_driver imx6q_cpufreq_driver = {
 	.target_index = imx6q_set_target,
 	.get = cpufreq_generic_get,
 	.init = imx6q_cpufreq_init,
+	.ready = imx6q_cpufreq_ready,
 	.name = "imx6q-cpufreq",
 	.attr = cpufreq_generic_attr,
 	.suspend = cpufreq_generic_suspend,
