@@ -167,6 +167,10 @@ static void imx_ldb_set_clock(struct imx_ldb *ldb, int mux, int chno,
 		unsigned long serial_clk, unsigned long di_clk)
 {
 	int ret;
+	int ctrl;
+
+	regmap_read(ldb->regmap, IOMUXC_GPR2, &ctrl);
+	dev_dbg(ldb->dev, "%d:%s: LDB_CTRL: 0x%08x\n", chno, __func__, ctrl);
 
 	dev_dbg(ldb->dev, "%s: now: %ld want: %ld\n", __func__,
 			clk_get_rate(ldb->clk_pll[chno]), serial_clk);
@@ -197,6 +201,7 @@ static void imx_ldb_encoder_enable(struct drm_encoder *encoder)
 	struct imx_ldb *ldb = imx_ldb_ch->ldb;
 	int dual = ldb->ldb_ctrl & LDB_SPLIT_MODE_EN;
 	int mux = drm_of_encoder_active_port_id(imx_ldb_ch->child, encoder);
+	int reg;
 
 	drm_panel_prepare(imx_ldb_ch->panel);
 
@@ -237,6 +242,10 @@ static void imx_ldb_encoder_enable(struct drm_encoder *encoder)
 				   mux << lvds_mux->shift);
 	}
 
+	regmap_read(ldb->regmap, IOMUXC_GPR2, &reg);
+	dev_dbg(ldb->dev, "%s: LDB_CTRL: 0x%08x\n", __func__, reg);
+	regmap_write(ldb->regmap, IOMUXC_GPR2, 0);
+	udelay(100);
 	regmap_write(ldb->regmap, IOMUXC_GPR2, ldb->ldb_ctrl);
 
 	drm_panel_enable(imx_ldb_ch->panel);
