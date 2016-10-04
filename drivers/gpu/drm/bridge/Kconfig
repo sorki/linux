@@ -35,6 +35,15 @@ config DRM_DUMB_VGA_DAC
 	  Support for non-programmable RGB to VGA DAC bridges, such as ADI
 	  ADV7123, TI THS8134 and THS8135 or passive resistor ladder DACs.
 
+config DRM_ITE_IT6251
+	tristate "ITE IT6251 LVDS/eDP bridge"
+	depends on OF
+	select DRM_KMS_HELPER
+	select DRM_PANEL
+	select REGMAP_I2C
+	help
+	  ITE IT6251 LVDS-eDP bridge chip driver.
+
 config DRM_LVDS_CODEC
 	tristate "Transparent LVDS encoders and decoders support"
 	depends on OF
