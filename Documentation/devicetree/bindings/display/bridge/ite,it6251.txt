@@ -1,0 +1,35 @@
+ITE IT6251 LVDS-to-eDP bridge bindings
+
+Required properties:
+- compatible:		Should be "ite,it6251"
+- reg:			i2c address of the bridge, i2c address of the LVDS part
+- reg-names:		Should be "bridge", "lvds"
+- power-supply:		Regulator to provide the supply voltage
+- video interfaces:	Device node can contain video interface port nodes
+			for panel according to [1].
+
+[1]: Documentation/devicetree/bindings/media/video-interfaces.txt
+
+Example:
+
+	it6251@5c {
+		compatible = "ite,it6251";
+		reg = <0x5c>, <0x5e>;
+		reg-names = "bridge", "lvds";
+		power-supply = <&reg_display>;
+
+		ports {
+			port@0 {
+				bridge_out_edp0: endpoint {
+					remote-endpoint = <&panel_in_edp0>;
+				};
+			};
+
+			port@1 {
+				bridge_in_lvds0: endpoint {
+					remote-endpoint = <&lvds0_out>;
+				};
+			};
+		};
+	};
+
