@@ -386,7 +386,7 @@ static int it6251_get_modes(struct drm_connector *connector)
 {
 	struct it6251_bridge *it6251 = conn_to_it6251(connector);
 
-	return drm_panel_get_modes(it6251->panel, connector);
+	return drm_panel_get_modes(it6251->panel); // , connector);
 }
 
 static const struct drm_connector_helper_funcs it6251_connector_helper_funcs = {
