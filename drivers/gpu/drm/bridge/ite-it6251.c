@@ -426,8 +426,8 @@ static int it6251_attach(struct drm_bridge *bridge, enum drm_bridge_attach_flags
 				 &it6251_connector_helper_funcs);
 	drm_connector_attach_encoder(&it6251->connector, bridge->encoder);
 
-	if (it6251->panel)
-		drm_panel_attach(it6251->panel, &it6251->connector);
+	//if (it6251->panel)
+	//	drm_panel_add(it6251->panel, &it6251->connector);
 
 	drm_helper_hpd_irq_event(it6251->connector.dev);
 
@@ -450,7 +450,7 @@ static const struct regmap_config it6251_regmap_config = {
 };
 
 static int
-it6251_probe(struct i2c_client *client, const struct i2c_device_id *id)
+it6251_probe(struct i2c_client *client)
 {
 	struct device *dev = &client->dev;
 	struct it6251_bridge *it6251;
@@ -514,19 +514,17 @@ err_lvds_regmap:
 	return ret;
 }
 
-static int it6251_remove(struct i2c_client *client)
+static void it6251_remove(struct i2c_client *client)
 {
 	struct it6251_bridge *it6251 = i2c_get_clientdata(client);
 	int ret;
 
 	ret = it6251_power_down(it6251);
-	if (ret)
-		return ret;
+	//if (ret)
+	//	return ret;
 
 	regmap_exit(it6251->lvds_regmap);
 	i2c_unregister_device(it6251->lvds_client);
-
-	return 0;
 }
 
 static int it6251_pm_suspend(struct device *dev)
